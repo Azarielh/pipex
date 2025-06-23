@@ -6,28 +6,40 @@
 /*   By: jlacaze- <jlacaze-@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/04 20:30:28 by jlacaze-          #+#    #+#             */
-/*   Updated: 2025/03/28 23:23:44 by jlacaze-         ###   ########.fr       */
+/*   Updated: 2025/06/23 16:01:13 by jlacaze-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	create_child(char *cmd, char **env, int fd_in)
+// static void fd_redirection (int W_END, int R_END, int fd_in)
+// {
+// 	if (dup2(W_END, STDOUT_FILENO) == -1){
+// 		close_fds(3, fd_in, R_END, W_END);
+// 		print_error(RED"At fd_redirection > stdout"RESET, 1);
+// 	}
+// 	if (dup2(fd_in, STDIN_FILENO) == -1){
+// 		close_fds(3, W_END, R_END, fd_in);
+// 		ft_printf("fd_in = %d\n W_END = %d\n R_END = %d\n", fd_in, W_END, R_END);
+// 		print_error(RED"At fd_redirection > (stdin)"RESET, 1);
+// 	}
+// }
+
+int	create_child(char *cmd, char **env, t_pipex *pipex)
 {
 	int		pipe_fd[2];
-	int		pid;
 
 	if (pipe(pipe_fd) == -1)
 		print_error("pipe failed", 1);
-	pid = fork();
-	if (pid == -1)
+	pipex->current_pid = fork();
+	if (pipex->current_pid == -1)
 		print_error("fork failed", 1);
-	if (pid == 0)
+	if (pipex->current_pid == 0)
 	{
 		close(pipe_fd[READ_END]);
 		dup2(pipe_fd[WRITE_END], STDOUT_FILENO);
 		close(pipe_fd[WRITE_END]);
-		if (fd_in == -1)
+		if (pipex->infile == -1)
 			print_error("open infile failed", 1);
 		exec_cmd(cmd, env);
 	}
@@ -37,6 +49,7 @@ void	create_child(char *cmd, char **env, int fd_in)
 		dup2(pipe_fd[READ_END], STDIN_FILENO);
 		close(pipe_fd[READ_END]);
 	}
+	return (pipe_fd[READ_END]);
 }
 // valgrind --trace-children=yes --track-fds=yes --track-origins=yes --leak-check=full ./pipex Makefile cat cat bonjour
 

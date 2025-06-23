@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include "libft.h"
+#include "ansi_format.h"
 
 #define READ_END 0
 #define WRITE_END 1
@@ -26,6 +27,9 @@ typedef struct s_pipex
 {
 	int infile; 
 	int outfile;
+	int fd_in;
+	int current_pid;
+	pid_t last_pid;
 	int flags;
 	char *infile_name;
 } t_pipex;
@@ -42,7 +46,7 @@ void print_error(char *msg, int exit_code);
  * @param cmd This have to be a string corresponding to a tty command.
  * @param env You have to pass your env to this function. It won't work otherwise.
  */
- void create_child(char *arg, char **envp, int fd_in);
+ int create_child(char *arg, char **envp, t_pipex *pipex);
 /**
  * @brief Execute une commande terminal avec execve
  * 
@@ -83,5 +87,5 @@ void delete_tmp_file(char *infile_name);
 void write_here_doc(char *limiter, char *infile_name);
 int open_files(t_pipex *pipex, int argc, char **argv);
 pid_t last_command(int argc, char **argv, char **envp, t_pipex pipex);
-
+void close_fds(int count, ...);
 #endif
