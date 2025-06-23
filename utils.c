@@ -6,7 +6,7 @@
 /*   By: jlacaze- <jlacaze-@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/04 20:30:28 by jlacaze-          #+#    #+#             */
-/*   Updated: 2025/06/23 16:01:13 by jlacaze-         ###   ########.fr       */
+/*   Updated: 2025/06/23 22:31:56 by jlacaze-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,15 @@ int	create_child(char *cmd, char **env, t_pipex *pipex)
 {
 	int		pipe_fd[2];
 
+// todo : secure dup2
 	if (pipe(pipe_fd) == -1)
 		print_error("pipe failed", 1);
 	pipex->current_pid = fork();
 	if (pipex->current_pid == -1)
 		print_error("fork failed", 1);
+	(void)env; // to avoid unused variable warning
+	(void)cmd; // to avoid unused variable warning
+
 	if (pipex->current_pid == 0)
 	{
 		close(pipe_fd[READ_END]);
@@ -41,6 +45,8 @@ int	create_child(char *cmd, char **env, t_pipex *pipex)
 		close(pipe_fd[WRITE_END]);
 		if (pipex->infile == -1)
 			print_error("open infile failed", 1);
+		close(pipex->infile);
+		close(pipex->outfile);
 		exec_cmd(cmd, env);
 	}
 	else
@@ -59,35 +65,10 @@ void	delete_tmp_file(char *infile_name)
 		print_error("unlink failed", -1);
 }
 
-void	write_here_doc(char *limiter, char *infile_name)
-{
-	char	*line;
-	int		infile;
-
-	line = NULL;
-	infile = open(infile_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (infile == -1)
-		print_error("create infile failed", -1);
-	while (1)
-	{
-		line = get_next_line(STDIN_FILENO);
-		if (line == NULL)
-			print_error("failed to read line", 1);
-		if (ft_strncmp(line, limiter, ft_strlen(limiter)) == 0)
-		{
-			free(line);
-			break ;
-		}
-		ft_putstr_fd(line, infile);
-		free(line);
-	}
-	close(infile);
-}
-
 int	open_files(t_pipex *pipex, int argc, char **argv)
 {
 	pipex->infile = open(pipex->infile_name, O_RDONLY);
-	pipex->outfile = open(argv[argc - 1], pipex->flags, 0644);
+	pipex->outfile = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	dup2(pipex->infile, STDIN_FILENO);
 	return (pipex->infile);
 }
@@ -96,8 +77,6 @@ pid_t	last_command(int argc, char **argv, char **env, t_pipex pipex)
 {
 	int pid;
 	close(pipex.infile);
-	if (argc >= 6 && ft_strncmp(argv[1], "here_doc\0", 9) == 0)
-		delete_tmp_file(pipex.infile_name);
 	if (pipex.outfile == -1)
 	{
 		pid = 0;
@@ -111,6 +90,7 @@ pid_t	last_command(int argc, char **argv, char **env, t_pipex pipex)
 	if (pid == 0)
 	{
 		dup2(pipex.outfile, STDOUT_FILENO);
+		close(pipex.outfile);
 		exec_cmd(argv[argc - 2], env);
 	}
 	return (pid);

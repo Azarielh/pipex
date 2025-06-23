@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
+#include <linux/limits.h>
 #include "libft.h"
 #include "ansi_format.h"
 
@@ -30,7 +31,6 @@ typedef struct s_pipex
 	int fd_in;
 	int current_pid;
 	pid_t last_pid;
-	int flags;
 	char *infile_name;
 } t_pipex;
 /**

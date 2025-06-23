@@ -6,7 +6,7 @@
 /*   By: jlacaze- <jlacaze-@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/04 20:43:54 by jlacaze-          #+#    #+#             */
-/*   Updated: 2025/03/29 00:02:50 by jlacaze-         ###   ########.fr       */
+/*   Updated: 2025/06/23 21:56:19 by jlacaze-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ char	*get_path(char *cmd, char **env)
 	char	*temp_path;
 	int		i;
 
+	// todo : check if no env -> absolute path 
 	paths = getent_env(env, "PATH=");
 	if (paths == NULL)
 		return (NULL);
@@ -95,7 +96,8 @@ void	exec_cmd(char *arg, char **env)
 	if (path == NULL)
 	{
 		free_arr(cmd_args);
-		print_error("command not found", 127);
+		write(STDERR_FILENO, "command not found", 17);
+		exit(127);
 	}
 	execve(path, cmd_args, env);
 	free_arr(cmd_args);

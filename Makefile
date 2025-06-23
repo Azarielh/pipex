@@ -5,7 +5,7 @@
 .PHONY: all clean fclean re
 
 # General 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g3
 NAME = pipex
 
 #___________ SRCS _____________
@@ -26,7 +26,7 @@ ERROR_MSG = "$(RED)[ERROR] Compilation failed$(RESET)"
 
 all: $(NAME)
 
-%.o: %.c pipex.h libft.h
+%.o: %.c pipex.h libft.h Makefile
 	@echo -n "$(BLUE) $@ $(RESET)"
 	@cc $(CFLAGS) -I . $< -c -o $@ && echo "$(GREEN)>>> SUCCESS $(RESET)" || { echo "$(ERROR_MSG)"; exit 1; }
 
