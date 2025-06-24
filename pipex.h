@@ -85,7 +85,7 @@ void free_arr(char **arr);
 char **ft_split_v2(const char *str, char c);
 void delete_tmp_file(char *infile_name);
 void write_here_doc(char *limiter, char *infile_name);
-int open_files(t_pipex *pipex, int argc, char **argv);
+int open_files(t_pipex *pipex, int argc, char **argv, char *infile_name);
 pid_t last_command(int argc, char **argv, char **envp, t_pipex pipex);
 void close_fds(int count, ...);
 #endif

@@ -11,6 +11,23 @@
 /* ************************************************************************** */
 
 #include "pipex.h"
+#include "stdarg.h"
+
+void close_fds(int count, ...)
+{
+	va_list args;
+	int		fd;
+
+	va_start(args, count);
+	while (count--)
+	{
+		fd = va_arg(args, int);
+		if (fd != -1)
+			if (close(fd) == -1)
+				perror(RED"close_fds"RESET);
+	}
+	va_end(args);
+}
 
 void	print_error(char *msg, int exit_code)
 {
@@ -21,6 +38,8 @@ void	print_error(char *msg, int exit_code)
 	}
 	if (errno != 0)
 		perror(msg);
+	else
+		ft_printf(RED"Error : "RESET"%s", msg);
 	exit(exit_code);
 }
 
@@ -31,17 +50,14 @@ int	main(int argc, char **argv, char **envp)
 	int		status;
 	int		exitcode;
 
-	if (argc < 5 || argv[1] == ".here_doc"){
-        print_error("Usage: ./pipex file1 cmd1 cmd2 file2\n", 1);}
+	if (argc < 5 || strncmp(argv[1], ".here_doc", 9) == 0)
+        print_error("Usage: ./pipex file1 cmd1 cmd2 file2\n", 1);
 	i = 2;
-	pipex.infile_name = argv[1];
-	open_files(&pipex, argc, argv);
+	open_files(&pipex, argc, argv, argv[1]);
 	while (i < argc - 2)
 		pipex.fd_in = create_child(argv[i++], envp, &pipex);
 	waitpid(pipex.current_pid, &status, 0);
 	pipex.last_pid = last_command(argc, argv, envp, pipex);
-	close(pipex.infile);
-	close(pipex.outfile);
 	pipex.current_pid = 0;
 	exitcode = 1;
 	while (pipex.current_pid != -1)
@@ -52,5 +68,6 @@ int	main(int argc, char **argv, char **envp)
 		else if (pipex.current_pid == pipex.last_pid && WIFSIGNALED(status))
 			exitcode = 128 + WTERMSIG(status);
 	}
+	close_fds(2, pipex.infile, pipex.outfile);
 	return (exitcode);
 }
