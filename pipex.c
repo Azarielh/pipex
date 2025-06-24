@@ -31,7 +31,7 @@ int	main(int argc, char **argv, char **envp)
 	int		status;
 	int		exitcode;
 
-	if (argc < 5){
+	if (argc < 5 || argv[1] == ".here_doc"){
         print_error("Usage: ./pipex file1 cmd1 cmd2 file2\n", 1);}
 	i = 2;
 	pipex.infile_name = argv[1];
@@ -41,7 +41,6 @@ int	main(int argc, char **argv, char **envp)
 	waitpid(pipex.current_pid, &status, 0);
 	pipex.last_pid = last_command(argc, argv, envp, pipex);
 	close(pipex.infile);
-
 	close(pipex.outfile);
 	pipex.current_pid = 0;
 	exitcode = 1;
