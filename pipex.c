@@ -23,8 +23,10 @@ void close_fds(int count, ...)
 	{
 		fd = va_arg(args, int);
 		if (fd != -1)
-			if (close(fd) == -1)
+			if (close(fd) == -1) {
+				ft_printf("%d\n", fd);
 				perror(RED"close_fds"RESET);
+			}
 	}
 	va_end(args);
 }

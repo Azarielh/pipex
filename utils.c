@@ -6,7 +6,7 @@
 /*   By: jlacaze- <jlacaze-@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/04 20:30:28 by jlacaze-          #+#    #+#             */
-/*   Updated: 2025/06/24 01:59:17 by jlacaze-         ###   ########.fr       */
+/*   Updated: 2025/06/25 00:43:28 by jlacaze-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,14 +29,14 @@ static void safe_dup(int old_fd, int new_fd, char *context)
 	if (dup2(old_fd, new_fd) == -1)
 	{
 		close(old_fd);
-		print_error(context, 1);
+		print_error(context, 0);
 	}
 }
 
 int	create_child(char *cmd, char **env, t_pipex *pipex)
 {
 	int		pipe_fd[2];
-// todo : secure dup2
+
 	if (pipe(pipe_fd) == -1)
 		print_error("pipe failed", 1);
 	pipex->current_pid = fork();
@@ -45,11 +45,13 @@ int	create_child(char *cmd, char **env, t_pipex *pipex)
 	if (pipex->current_pid == 0)
 	{
 		close(pipe_fd[READ_END]);
-
 		safe_dup(pipe_fd[WRITE_END], STDOUT_FILENO, "child : dup2");
-		if (pipex->infile == -1)
-			print_error("open infile failed", 1);
-		close_fds(2, pipex->infile, pipex->outfile);
+
+ if (pipex->infile == -1)
+         print_error("open infile failed", 1);
+ close_fds(2, pipex->infile, pipex->outfile);
+
+		// close_fds(3, pipex->infile, pipex->outfile, pipe_fd[READ_END]);
 		exec_cmd(cmd, env);
 	}
 	else
@@ -61,18 +63,15 @@ int	create_child(char *cmd, char **env, t_pipex *pipex)
 }
 // valgrind --trace-children=yes --track-fds=yes --track-origins=yes --leak-check=full ./pipex Makefile cat cat bonjour
 
-void	delete_tmp_file(char *infile_name)
-{
-	if (unlink(infile_name) == -1)
-		print_error("unlink failed", -1);
-}
 
 int	open_files(t_pipex *pipex, int argc, char **argv, char *infile_name)
 {
 	pipex->infile_name = infile_name;
 	pipex->infile = open(infile_name, O_RDONLY);
 	pipex->outfile = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	dup2(pipex->infile, STDIN_FILENO);
+	//dup2(pipex->infile, STDIN_FILENO);
+	if (!access(infile_name, F_OK))
+		safe_dup(pipex->infile, STDIN_FILENO, "open_files");
 	return (pipex->infile);
 }
 
@@ -92,8 +91,8 @@ pid_t	last_command(int argc, char **argv, char **env, t_pipex pipex)
 		print_error("fork failed", 1);
 	if (pid == 0)
 	{
-		dup2(pipex.outfile, STDOUT_FILENO);
-		close(pipex.outfile);
+		safe_dup(pipex.outfile, STDOUT_FILENO, "last_child : dup2");
+		close_fds(1, pipex.fd_in);
 		exec_cmd(argv[argc - 2], env);
 	}
 	return (pid);
