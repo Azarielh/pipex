@@ -6,7 +6,7 @@
 /*   By: jlacaze- <jlacaze-@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/04 20:43:54 by jlacaze-          #+#    #+#             */
-/*   Updated: 2025/06/23 21:56:19 by jlacaze-         ###   ########.fr       */
+/*   Updated: 2025/06/25 02:06:42 by jlacaze-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void	free_arr(char **arr)
 	free(arr);
 }
 
-char	**getent_env(char **env, char *key)
+char	**getent_env(char **env)
 {
 	char	**paths;
 	int		i;
@@ -34,7 +34,7 @@ char	**getent_env(char **env, char *key)
 	paths = NULL;
 	while (env[i])
 	{
-		if (ft_strncmp(env[i], key, 5) == 0)
+		if (ft_strncmp(env[i], "PATH=", 5) == 0)
 		{
 			paths = ft_split_v2(env[i] + 5, ':');
 			if (paths == NULL)
@@ -46,6 +46,8 @@ char	**getent_env(char **env, char *key)
 	return (paths);
 }
 
+
+
 char	*get_path(char *cmd, char **env)
 {
 	char	**paths;
@@ -54,7 +56,7 @@ char	*get_path(char *cmd, char **env)
 	int		i;
 
 	// todo : check if no env -> absolute path 
-	paths = getent_env(env, "PATH=");
+	paths = getent_env(env);
 	if (paths == NULL)
 		return (NULL);
 	i = 0;

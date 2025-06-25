@@ -1,4 +1,4 @@
- /* ************************************************************************** */
+/* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   pipex.c                                            :+:      :+:    :+:   */
@@ -6,16 +6,16 @@
 /*   By: jlacaze- <jlacaze-@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/04 20:29:38 by jlacaze-          #+#    #+#             */
-/*   Updated: 2025/03/28 23:00:34 by jlacaze-         ###   ########.fr       */
+/*   Updated: 2025/06/25 01:34:28 by jlacaze-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 #include "stdarg.h"
 
-void close_fds(int count, ...)
+void	close_fds(int count, ...)
 {
-	va_list args;
+	va_list	args;
 	int		fd;
 
 	va_start(args, count);
@@ -23,10 +23,8 @@ void close_fds(int count, ...)
 	{
 		fd = va_arg(args, int);
 		if (fd != -1)
-			if (close(fd) == -1) {
-				ft_printf("%d\n", fd);
-				perror(RED"close_fds"RESET);
-			}
+			if (close(fd) == -1)
+				continue ;
 	}
 	va_end(args);
 }
@@ -53,11 +51,11 @@ int	main(int argc, char **argv, char **envp)
 	int		exitcode;
 
 	if (argc < 5 || strncmp(argv[1], ".here_doc", 9) == 0)
-        print_error("Usage: ./pipex file1 cmd1 cmd2 file2\n", 1);
+		print_error("Usage: ./pipex file1 cmd1 cmd2 file2\n", 1);
 	i = 2;
 	open_files(&pipex, argc, argv, argv[1]);
 	while (i < argc - 2)
-		pipex.fd_in = create_child(argv[i++], envp, &pipex);
+		create_child(argv[i++], envp, &pipex);
 	waitpid(pipex.current_pid, &status, 0);
 	pipex.last_pid = last_command(argc, argv, envp, pipex);
 	pipex.current_pid = 0;

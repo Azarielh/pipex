@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_printf.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlacaze- <jlacaze-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlacaze- <jlacaze-@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/13 14:07:56 by jlacaze-          #+#    #+#             */
-/*   Updated: 2025/02/17 15:25:27 by jlacaze-         ###   ########.fr       */
+/*   Updated: 2025/06/25 01:57:35 by jlacaze-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "libft.h"
-
 
 int	select_flag_n_print(char flag, va_list args)
 {
